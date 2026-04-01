@@ -1,0 +1,33 @@
+﻿[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "remote-sandbox-framework"
+version = "0.1.0"
+description = "Reusable FastAPI sidecar and CLI for controlling remote compute sandboxes."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+  { name = "dogeee-debug" }
+]
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.30,<1",
+  "pydantic>=2.7,<3"
+]
+
+[project.urls]
+Homepage = "https://github.com/dogeee-debug/remote-sandbox-framework"
+Repository = "https://github.com/dogeee-debug/remote-sandbox-framework"
+
+[project.scripts]
+rsf = "remote_sandbox_framework.cli:main"
+rsf-server = "remote_sandbox_framework.app:run"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
