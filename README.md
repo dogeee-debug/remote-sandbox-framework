@@ -1,4 +1,5 @@
-﻿# Remote Sandbox Framework
+ # dogeee-debug from XJU
+ # Remote Sandbox Framework
 
 一个把 `autodl_sandbox_agent` 抽象出来的可复用框架：
 
@@ -169,29 +170,6 @@ Authorization: Bearer <REMOTE_SANDBOX_TOKEN>
 
 ---
 
-## 9. 与原 `autodl_sandbox_agent` 的关系
-
-这次抽象保留了原项目最实用的能力：
-
-- token 鉴权
-- 受限工作区执行命令
-- 作业状态/日志查询
-- 租机时长与费用估算
-- 自动关机
-- tmux 会话探测
-
-去掉了原目录里偏具体业务的内容，例如：
-
-- GRBENCH 专用快捷命令
-- 直接绑定 AutoDL 文案与命名
-
-并新增：
-
-- provider preset 机制
-- 独立可发布仓库结构
-- 更清晰的 app factory / package layout
-
----
 
 ## 10. 开发验证
 
