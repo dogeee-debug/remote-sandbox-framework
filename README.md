@@ -62,7 +62,7 @@ vim .env
 bash scripts/start_server.sh
 ```
 
-如果你在 AutoDL，优先参考：
+如果你和我一样，都是在 AutoDL 买的算力，建议你优先参考：
 
 - `examples/autodl/.env.example`
 - `examples/autodl/README.md`
@@ -100,7 +100,7 @@ nohup bash scripts/start_server.sh > runtime/server.log 2>&1 &
 
 ## 6. 本地连接
 
-推荐先打 SSH 隧道：
+推荐你先打 SSH 隧道：
 
 ```bash
 ssh -L 8787:127.0.0.1:8787 root@YOUR_REMOTE_HOST
