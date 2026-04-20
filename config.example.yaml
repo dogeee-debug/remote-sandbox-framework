@@ -1,0 +1,17 @@
+# Optional human-readable project config.
+# The scheduler itself consumes JSON manifests under examples/*.json.
+
+remote_sandbox:
+  url: "http://127.0.0.1:8787"
+  token: "change-me"
+
+openai_compatible_assistant:
+  # Any OpenAI-compatible endpoint that implements /v1/chat/completions.
+  base_url: "https://api.openai.com"
+  api_key: "set-via-env-in-real-use"
+  model: "gpt-4o"
+
+safety:
+  default_execution_mode: "manifest-only"
+  allow_shutdown: false
+  require_file_completion_checks: true

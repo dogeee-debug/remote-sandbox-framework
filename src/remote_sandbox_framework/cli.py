@@ -4,9 +4,14 @@ import argparse
 import json
 import os
 import time
+from pathlib import Path
 from typing import Any
 from urllib import error, request
 
+from .assistant import ManifestProposalRequest, propose_tasks
+from .board import BoardError, board_init, board_replay, board_run, board_status
+from .openai_compat import OpenAICompatClient
+from .orchestrator import reconcile_manifest, run_scheduler
 from .providers import list_provider_profiles
 
 DEFAULT_URL = "http://127.0.0.1:8787"
@@ -174,6 +179,83 @@ def cmd_profiles(_args) -> int:
     return 0
 
 
+def cmd_manifest_reconcile(args) -> int:
+    changed, summary = reconcile_manifest(args.manifest, override_failed=args.override_failed)
+    print(f"changed={changed}")
+    for line in summary:
+        print(line)
+    return 0
+
+
+def cmd_manifest_schedule(args) -> int:
+    return run_scheduler(
+        manifest_path=args.manifest,
+        queue_log=args.queue_log,
+        runs_dir=args.runs_dir,
+        poll_seconds=args.poll_seconds,
+        max_idle_polls=args.max_idle_polls,
+    )
+
+
+def cmd_assistant_propose(args) -> int:
+    client = OpenAICompatClient(
+        base_url=args.base_url,
+        api_key=args.api_key,
+        model=args.model,
+        timeout_seconds=args.timeout_seconds,
+    )
+    req = ManifestProposalRequest(
+        goal=args.goal,
+        constraints=args.constraint or [],
+        manifest_path=Path(os.path.abspath(args.manifest)) if args.manifest else None,
+        max_new_tasks=args.max_new_tasks,
+    )
+    print_json(propose_tasks(client, req))
+    return 0
+
+
+def cmd_board_run(args) -> int:
+    try:
+        code, run_dir = board_run(
+            manifest_path=Path(os.path.abspath(args.manifest)),
+            run_dir=Path(os.path.abspath(args.run_dir)) if args.run_dir else None,
+            base_url=args.base_url,
+            api_key=args.api_key,
+            model=args.model,
+            timeout_seconds=args.timeout_seconds,
+            resume=not args.no_resume,
+        )
+    except BoardError as exc:
+        raise SystemExit(str(exc)) from exc
+    print_json({"ok": code == 0, "run_dir": str(run_dir), "manifest": str(Path(os.path.abspath(args.manifest))), "code": code})
+    return code
+
+
+def cmd_board_status(args) -> int:
+    try:
+        print_json(board_status(Path(os.path.abspath(args.run_dir))))
+    except BoardError as exc:
+        raise SystemExit(str(exc)) from exc
+    return 0
+
+
+def cmd_board_replay(args) -> int:
+    try:
+        print_json(board_replay(Path(os.path.abspath(args.run_dir))))
+    except BoardError as exc:
+        raise SystemExit(str(exc)) from exc
+    return 0
+
+
+def cmd_board_init(args) -> int:
+    try:
+        dest = board_init(args.preset, Path(os.path.abspath(args.dest)))
+    except BoardError as exc:
+        raise SystemExit(str(exc)) from exc
+    print_json({"preset": args.preset, "dest": str(dest)})
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="CLI for Remote Sandbox Framework")
     parser.add_argument("--url", default=None, help=f"Agent base URL. Default env REMOTE_SANDBOX_URL or {DEFAULT_URL}")
@@ -230,6 +312,70 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("profiles")
     p.set_defaults(func=cmd_profiles)
+
+    p = sub.add_parser("manifest-reconcile", help="Recompute task statuses from completion artifacts.")
+    p.add_argument("--manifest", required=True, type=str)
+    p.add_argument("--override-failed", action="store_true")
+    p.set_defaults(
+        func=lambda args: cmd_manifest_reconcile(
+            argparse.Namespace(
+                manifest=Path(os.path.abspath(args.manifest)),
+                override_failed=args.override_failed,
+            )
+        )
+    )
+
+    p = sub.add_parser("manifest-schedule", help="Run the resource-aware manifest scheduler.")
+    p.add_argument("--manifest", required=True, type=str)
+    p.add_argument("--queue-log", required=True, type=str)
+    p.add_argument("--runs-dir", required=True, type=str)
+    p.add_argument("--poll-seconds", type=float, default=10.0)
+    p.add_argument("--max-idle-polls", type=int, default=0)
+    p.set_defaults(
+        func=lambda args: cmd_manifest_schedule(
+            argparse.Namespace(
+                manifest=Path(os.path.abspath(args.manifest)),
+                queue_log=Path(os.path.abspath(args.queue_log)),
+                runs_dir=Path(os.path.abspath(args.runs_dir)),
+                poll_seconds=args.poll_seconds,
+                max_idle_polls=args.max_idle_polls,
+            )
+        )
+    )
+
+    p = sub.add_parser("assistant-propose", help="Ask an OpenAI-compatible assistant to propose manifest tasks.")
+    p.add_argument("--base-url", required=True)
+    p.add_argument("--api-key", required=True)
+    p.add_argument("--model", required=True)
+    p.add_argument("--goal", required=True)
+    p.add_argument("--manifest", default=None)
+    p.add_argument("--constraint", action="append", default=[])
+    p.add_argument("--max-new-tasks", type=int, default=5)
+    p.add_argument("--timeout-seconds", type=int, default=60)
+    p.set_defaults(func=cmd_assistant_propose)
+
+    p = sub.add_parser("board-run", help="Run a board manifest with deterministic artifact logging.")
+    p.add_argument("--manifest", required=True, type=str)
+    p.add_argument("--run-dir", default=None, type=str)
+    p.add_argument("--base-url", default=None)
+    p.add_argument("--api-key", default=None)
+    p.add_argument("--model", default=None)
+    p.add_argument("--timeout-seconds", type=int, default=60)
+    p.add_argument("--no-resume", action="store_true")
+    p.set_defaults(func=cmd_board_run)
+
+    p = sub.add_parser("board-status", help="Read the latest board state.json from a run directory.")
+    p.add_argument("--run-dir", required=True, type=str)
+    p.set_defaults(func=cmd_board_status)
+
+    p = sub.add_parser("board-replay", help="Replay board events.ndjson into a compact visible state.")
+    p.add_argument("--run-dir", required=True, type=str)
+    p.set_defaults(func=cmd_board_replay)
+
+    p = sub.add_parser("board-init", help="Copy a board preset into a destination directory.")
+    p.add_argument("--preset", required=True)
+    p.add_argument("--dest", required=True)
+    p.set_defaults(func=cmd_board_init)
 
     return parser
 

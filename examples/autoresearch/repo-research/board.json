@@ -1,0 +1,150 @@
+{
+  "kind": "board",
+  "version": 2,
+  "name": "repo-research",
+  "description": "Minimal deterministic autoresearch board for a local repository.",
+  "metadata": {
+    "entrypoint": "rsf board-run --manifest examples/autoresearch/repo-research/board.json"
+  },
+  "artifacts": [
+    {
+      "name": "repo_index",
+      "path": "runtime/artifacts/repo-index.md",
+      "format": "text",
+      "required": true,
+      "description": "Repository file inventory and quick context."
+    },
+    {
+      "name": "planner_brief",
+      "path": "runtime/artifacts/planner-brief.md",
+      "format": "text",
+      "required": true,
+      "description": "Planner brief describing the research objective."
+    },
+    {
+      "name": "evidence",
+      "path": "runtime/artifacts/evidence.json",
+      "format": "json",
+      "required": true,
+      "description": "Structured evidence extracted from the repository."
+    },
+    {
+      "name": "report",
+      "path": "runtime/artifacts/report.md",
+      "format": "text",
+      "required": true,
+      "description": "Final shareable report."
+    },
+    {
+      "name": "review_pass",
+      "path": "runtime/artifacts/review-pass.json",
+      "format": "json",
+      "required": true,
+      "description": "Review gate decision."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "repo_scan",
+      "role": "inspector",
+      "mode": "shell_stage",
+      "goal": "Create a compact repository index for downstream agent tasks.",
+      "produces": [
+        "repo_index"
+      ],
+      "command": "python scripts/repo_scan.py --root . --output runtime/artifacts/repo-index.md",
+      "runner": {
+        "cwd": "."
+      },
+      "completion": {
+        "kind": "file_exists",
+        "path": "runtime/artifacts/repo-index.md"
+      }
+    },
+    {
+      "id": "planner",
+      "role": "planner",
+      "mode": "llm_propose",
+      "goal": "Draft a concise autoresearch plan grounded in the repository index.",
+      "depends_on": [
+        "repo_scan"
+      ],
+      "inputs": [
+        "repo_index"
+      ],
+      "produces": [
+        "planner_brief"
+      ],
+      "prompt": "You are the planning worker for {{board_name}}. Goal: {{goal}}.\n\nUse the following repository context:\n\n{{inputs}}\n\nProduce a short markdown brief with sections `Objective`, `Observations`, and `Next Steps`.\nThe brief must mention `Deterministic Execution`, `Artifacts`, and `Observability`.\nWrite only the markdown for the brief.",
+      "runner": {
+        "max_tokens": 1200
+      }
+    },
+    {
+      "id": "evidence_extract",
+      "role": "researcher",
+      "mode": "shell_stage",
+      "goal": "Convert the planner brief and repo index into structured evidence.",
+      "depends_on": [
+        "planner"
+      ],
+      "inputs": [
+        "repo_index",
+        "planner_brief"
+      ],
+      "produces": [
+        "evidence"
+      ],
+      "command": "python scripts/extract_evidence.py --repo-index runtime/artifacts/repo-index.md --planner-brief runtime/artifacts/planner-brief.md --output runtime/artifacts/evidence.json",
+      "runner": {
+        "cwd": "."
+      },
+      "completion": {
+        "kind": "file_exists",
+        "path": "runtime/artifacts/evidence.json"
+      }
+    },
+    {
+      "id": "synthesis",
+      "role": "synthesizer",
+      "mode": "synthesis",
+      "goal": "Turn the evidence into a GitHub-friendly report.",
+      "depends_on": [
+        "evidence_extract"
+      ],
+      "inputs": [
+        "planner_brief",
+        "evidence"
+      ],
+      "produces": [
+        "report"
+      ],
+      "prompt": "You are the synthesis worker for {{board_name}}. Goal: {{goal}}.\n\nInputs:\n{{inputs}}\n\nProduce a markdown report with sections `Summary`, `Signals`, `Recommended Product Positioning`, and `Why This Is Different`.\nThe report must include the exact phrases `Deterministic Execution`, `Artifacts`, and `Observability`.\nWrite only the final markdown report.",
+      "runner": {
+        "max_tokens": 1600
+      }
+    },
+    {
+      "id": "review",
+      "role": "reviewer",
+      "mode": "review_gate",
+      "goal": "Ensure the final report contains the required product signals.",
+      "depends_on": [
+        "synthesis"
+      ],
+      "inputs": [
+        "report"
+      ],
+      "produces": [
+        "review_pass"
+      ],
+      "review": {
+        "must_contain": [
+          "Deterministic Execution",
+          "Artifacts",
+          "Observability"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "Minimal SSH runner example. Fill in host/user/workdir before use.",
+  "resource_slots": {
+    "cpu": 1,
+    "gpu": 1
+  },
+  "runner_profiles": {
+    "remote_linux": {
+      "type": "ssh_shell",
+      "host": "YOUR_HOST",
+      "user": "root",
+      "port": 22,
+      "workdir": "/root/workspace"
+    }
+  },
+  "tasks": [
+    {
+      "name": "remote_smoke",
+      "priority": 10,
+      "status": "queued",
+      "runner": {
+        "profile": "remote_linux"
+      },
+      "stages": [
+        {
+          "name": "run",
+          "slot": "cpu",
+          "completion": {
+            "kind": "file_exists",
+            "path": "/root/workspace/runtime/smoke/remote.done"
+          },
+          "command": "mkdir -p /root/workspace/runtime/smoke && printf ok > /root/workspace/runtime/smoke/remote.done"
+        }
+      ]
+    }
+  ]
+}

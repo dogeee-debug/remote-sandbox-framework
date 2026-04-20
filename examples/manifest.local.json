@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "description": "Minimal local scheduler smoke example.",
+  "resource_slots": {
+    "cpu": 1,
+    "gpu": 0
+  },
+  "tasks": [
+    {
+      "name": "hello_local",
+      "priority": 10,
+      "status": "done",
+      "stages": [
+        {
+          "name": "run",
+          "slot": "cpu",
+          "completion": {
+            "kind": "file_exists",
+            "path": "runtime/smoke/hello.done"
+          },
+          "command": "python -c \"from pathlib import Path; Path('runtime/smoke').mkdir(parents=True, exist_ok=True); Path('runtime/smoke/hello.done').write_text('ok', encoding='utf-8')\""
+        }
+      ]
+    }
+  ]
+}
