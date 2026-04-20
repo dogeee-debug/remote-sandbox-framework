@@ -1,5 +1,7 @@
 # Remote Sandbox Framework
 
+Most agent frameworks optimize for capability demos. This one optimizes for execution you can replay, audit, and trust.
+
 Minimal autoresearch multi-agent kernel for deterministic execution.
 
 `remote-sandbox-framework` is a small, auditable runtime for agent collaboration where:
@@ -11,6 +13,16 @@ Minimal autoresearch multi-agent kernel for deterministic execution.
 - observability is written to files you can replay
 
 It does not try to be a full agent platform. It is intentionally small.
+
+![Remote Sandbox Framework hero](docs/assets/hero-terminal.svg)
+
+## GitHub Setup
+
+Suggested GitHub homepage settings are bundled in [docs/github-homepage.md](docs/github-homepage.md).
+
+- About description: `Minimal autoresearch multi-agent kernel for deterministic, artifact-first execution on local or remote sandboxes.`
+- Social preview source: [docs/assets/hero-terminal.svg](docs/assets/hero-terminal.svg)
+- Suggested topics: `ai-agents`, `multi-agent`, `autoresearch`, `agent-framework`, `deterministic`, `artifact-first`, `remote-execution`
 
 ## Why This Exists
 
@@ -49,6 +61,13 @@ Run the flagship demo:
 
 ```bash
 rsf board-run --manifest examples/autoresearch/repo-research/board.json
+```
+
+Expected demo shape:
+
+```text
+planner -> evidence -> synthesis -> review
+events.ndjson + state.json + summary.json
 ```
 
 Inspect the latest run:
@@ -272,12 +291,21 @@ Current job/runtime endpoints:
 
 | Dimension | This project | Heavier agent stacks |
 | --- | --- | --- |
-| Core abstraction | Artifacts + deterministic tasks | Conversations + tools + orchestration layers |
-| Execution safety | Bounded shell and file completion checks | Often broader tool autonomy |
-| Replayability | `events.ndjson` + `state.json` | Varies widely |
-| Remote runtime | Built in | Often external |
+| Core abstraction | Artifacts plus deterministic tasks | Conversations plus tools plus orchestration layers |
+| Failure recovery | Resume from files and replay from events | Often coupled to framework-specific state |
+| Execution safety | Bounded shell plus file completion checks | Often broader tool autonomy |
+| Observability | `events.ndjson`, `state.json`, `summary.json` | Varies widely |
+| Local onboarding | Works with deterministic fallback, no model required | Often expects full model/tool setup |
+| Remote runtime | Built in | Commonly external or bolted on |
 | Scope | Small kernel | General-purpose platform |
-| Setup cost | Low | Medium to high |
+| Time to inspect a run | Minutes | Often much longer |
+
+## Why It Can Get Stars
+
+- Sharp scope: it is easy to understand in one screen.
+- Strong contrast: it does less than bigger frameworks, but does the critical execution path more clearly.
+- Shareable demo: one command produces a board run, a report, and replayable artifacts.
+- Real-world hook: local plus remote execution is built in instead of treated as an afterthought.
 
 ## Development Verification
 

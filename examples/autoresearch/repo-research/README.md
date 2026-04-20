@@ -10,6 +10,13 @@ It runs a deterministic artifact-first board:
 4. `synthesis` writes a shareable report.
 5. `review` enforces a tiny quality gate.
 
+## Why This Demo Is Shareable
+
+- one command produces a visible multi-step run
+- every stage writes a durable artifact
+- the final report is screenshot-friendly
+- no external model is required to see the full flow
+
 ## Quickstart
 
 ```bash
@@ -28,3 +35,11 @@ The demo works without an LLM. If `--base-url`, `--api-key`, and `--model` are n
 - `examples/autoresearch/repo-research/runtime/artifacts/repo-index.md`
 - `examples/autoresearch/repo-research/runtime/artifacts/evidence.json`
 - `examples/autoresearch/repo-research/runtime/artifacts/report.md`
+
+## Screenshot Tips
+
+For a GitHub screenshot or social post, show:
+
+1. the `rsf board-run` command output
+2. the latest `summary.json`
+3. the generated `report.md`

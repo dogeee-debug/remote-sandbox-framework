@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1B2A"/>
+      <stop offset="1" stop-color="#14213D"/>
+    </linearGradient>
+    <linearGradient id="card" x1="140" y1="90" x2="1140" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#1F2937"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="1080" cy="110" r="180" fill="#FCA311" fill-opacity="0.12"/>
+  <circle cx="190" cy="620" r="220" fill="#2EC4B6" fill-opacity="0.10"/>
+  <rect x="140" y="90" width="1000" height="540" rx="28" fill="url(#card)" stroke="#334155" stroke-width="2"/>
+  <rect x="140" y="90" width="1000" height="54" rx="28" fill="#0F172A"/>
+  <circle cx="182" cy="117" r="8" fill="#FB7185"/>
+  <circle cx="212" cy="117" r="8" fill="#FBBF24"/>
+  <circle cx="242" cy="117" r="8" fill="#34D399"/>
+  <text x="290" y="123" fill="#94A3B8" font-family="Consolas, 'Courier New', monospace" font-size="18">remote-sandbox-framework</text>
+
+  <text x="184" y="212" fill="#F8FAFC" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700">Minimal Multi-Agent Kernel</text>
+  <text x="184" y="258" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="28">Deterministic autoresearch for local + remote sandboxes</text>
+
+  <rect x="184" y="306" width="912" height="224" rx="18" fill="#020617" stroke="#1E293B" stroke-width="2"/>
+  <text x="214" y="352" fill="#22C55E" font-family="Consolas, 'Courier New', monospace" font-size="24">$ rsf board-run --manifest examples/autoresearch/repo-research/board.json</text>
+  <text x="214" y="396" fill="#E2E8F0" font-family="Consolas, 'Courier New', monospace" font-size="22">{ "ok": true, "run_dir": "runtime/board-runs/repo-research-..." }</text>
+  <text x="214" y="440" fill="#93C5FD" font-family="Consolas, 'Courier New', monospace" font-size="22">events.ndjson</text>
+  <text x="430" y="440" fill="#93C5FD" font-family="Consolas, 'Courier New', monospace" font-size="22">state.json</text>
+  <text x="608" y="440" fill="#93C5FD" font-family="Consolas, 'Courier New', monospace" font-size="22">summary.json</text>
+  <text x="214" y="484" fill="#A7F3D0" font-family="Consolas, 'Courier New', monospace" font-size="22">planner -&gt; evidence -&gt; synthesis -&gt; review</text>
+
+  <rect x="184" y="564" width="168" height="42" rx="21" fill="#1D4ED8"/>
+  <rect x="368" y="564" width="160" height="42" rx="21" fill="#0F766E"/>
+  <rect x="544" y="564" width="146" height="42" rx="21" fill="#9A3412"/>
+  <text x="214" y="591" fill="#EFF6FF" font-family="Segoe UI, Arial, sans-serif" font-size="20">artifact-first</text>
+  <text x="400" y="591" fill="#F0FDFA" font-family="Segoe UI, Arial, sans-serif" font-size="20">replayable</text>
+  <text x="575" y="591" fill="#FFF7ED" font-family="Segoe UI, Arial, sans-serif" font-size="20">safe shell</text>
+</svg>
